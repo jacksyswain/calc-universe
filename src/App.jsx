@@ -1,37 +1,22 @@
 import { useState } from "react";
 import { calculators } from "./calculators/config";
-import CalculatorCard from "./components/CalculatorCard";
+import Sidebar from "./components/Sidebar";
 import AccordionCalculator from "./components/AccordionCalculator";
 
 export default function App() {
-  const [active, setActive] = useState(null);
+  const [active, setActive] = useState(calculators[0]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        All-in-One Calculator
-      </h1>
+    <div className="flex">
+      <Sidebar
+        calculators={calculators}
+        active={active}
+        setActive={setActive}
+      />
 
-      {/* GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {calculators.map((calc) => (
-          <CalculatorCard
-            key={calc.id}
-            calc={calc}
-            onClick={() =>
-              setActive(active === calc.id ? null : calc.id)
-            }
-          />
-        ))}
+      <div className="flex-1 p-6 bg-gray-100 min-h-screen">
+        <AccordionCalculator calc={active} />
       </div>
-
-      {/* ACCORDION */}
-      {calculators.map(
-        (calc) =>
-          active === calc.id && (
-            <AccordionCalculator key={calc.id} calc={calc} />
-          )
-      )}
     </div>
   );
 }
