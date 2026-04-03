@@ -1,18 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "../store/useStore";
 
 export default function AccordionCalculator({ calc }) {
-  const [inputs, setInputs] = useState({});
-  const [result, setResult] = useState(null);
+  const {
+    addHistory,
+    calculatorStates,
+    setCalculatorState,
+  } = useStore();
+
+  // 🧠 Load saved state for this calculator
+  const savedState = calculatorStates[calc.id] || {};
+
+  const [inputs, setInputs] = useState(savedState.inputs || {});
+  const [result, setResult] = useState(savedState.result || null);
   const [error, setError] = useState("");
-  const addHistory = useStore((s) => s.addHistory);
+
+  // 🔄 Update state when switching calculator
+  useEffect(() => {
+    const saved = calculatorStates[calc.id] || {};
+    setInputs(saved.inputs || {});
+    setResult(saved.result || null);
+    setError("");
+  }, [calc.id]);
 
   // 🧠 handle input
   const handleChange = (name, value) => {
-    setInputs((prev) => ({
-      ...prev,
+    const updated = {
+      ...inputs,
       [name]: value === "" ? "" : Number(value),
-    }));
+    };
+
+    setInputs(updated);
+
+    // 🔥 Save live input state
+    setCalculatorState(calc.id, {
+      inputs: updated,
+      result,
+    });
   };
 
   // 🧠 calculate
@@ -30,6 +54,13 @@ export default function AccordionCalculator({ calc }) {
       const res = calc.calculate(inputs);
       setResult(res);
 
+      // 💾 Save state
+      setCalculatorState(calc.id, {
+        inputs,
+        result: res,
+      });
+
+      // 🕒 History
       addHistory({
         type: calc.title,
         result: res,
@@ -40,13 +71,19 @@ export default function AccordionCalculator({ calc }) {
     }
   };
 
+  // 🔄 Reset ONLY this calculator
   const handleReset = () => {
     setInputs({});
     setResult(null);
     setError("");
+
+    setCalculatorState(calc.id, {
+      inputs: {},
+      result: null,
+    });
   };
 
-  // 📊 detect category (for BMI / Percentage etc.)
+  // 📊 detect category
   const getCategory = () => {
     if (!calc.ranges || typeof result !== "number") return null;
 
@@ -139,7 +176,6 @@ export default function AccordionCalculator({ calc }) {
                 Result
               </p>
 
-              {/* handle object (GST) */}
               {typeof result === "object" ? (
                 <div className="mt-2 text-lg font-semibold text-green-600 dark:text-green-400">
                   {Object.entries(result).map(([key, val]) => (
@@ -168,7 +204,7 @@ export default function AccordionCalculator({ calc }) {
               </div>
             )}
 
-            {/* 📈 Progress Bar */}
+            {/* 📈 Progress */}
             {typeof result === "number" && (
               <div className="w-full bg-gray-200 dark:bg-white/10 h-2 rounded-full">
                 <div
