@@ -1,5 +1,5 @@
 export const calculators = [
-  // 🧠 BMI
+  // 🧠 BMI (MULTI-UNIT)
   {
     id: "bmi",
     title: "BMI Calculator",
@@ -9,9 +9,32 @@ export const calculators = [
     formulaLabel: "BMI = weight / height²",
 
     inputs: [
-      { name: "height", label: "Height", unit: "m", min: 0 },
-      { name: "weight", label: "Weight", unit: "kg", min: 0 },
+      {
+        name: "height",
+        label: "Height",
+        units: ["cm", "m", "ft"],
+        defaultUnit: "cm",
+      },
+      {
+        name: "weight",
+        label: "Weight",
+        units: ["kg", "lb"],
+        defaultUnit: "kg",
+      },
     ],
+
+    // 🔥 Normalize to meters & kg
+    normalize: ({ height, heightUnit, weight, weightUnit }) => {
+      let h = height;
+      let w = weight;
+
+      if (heightUnit === "cm") h = height / 100;
+      if (heightUnit === "ft") h = height * 0.3048;
+
+      if (weightUnit === "lb") w = weight * 0.453592;
+
+      return { height: h, weight: w };
+    },
 
     calculate: ({ height, weight }) => {
       if (!height || !weight) return null;
@@ -19,24 +42,23 @@ export const calculators = [
     },
 
     ranges: [
-      { label: "Underweight", min: 0, max: 18.5, color: "blue" },
-      { label: "Normal", min: 18.5, max: 24.9, color: "green" },
-      { label: "Overweight", min: 25, max: 29.9, color: "yellow" },
-      { label: "Obese", min: 30, max: Infinity, color: "red" },
+      { label: "Underweight", min: 0, max: 18.5 },
+      { label: "Normal", min: 18.5, max: 24.9 },
+      { label: "Overweight", min: 25, max: 29.9 },
+      { label: "Obese", min: 30, max: Infinity },
     ],
   },
 
-  // 🎂 Age
+  // 🎂 AGE
   {
     id: "age",
     title: "Age Calculator",
     icon: "🎂",
     category: "General",
     description: "Calculate your current age",
-    formulaLabel: "Age = Current Year - Birth Year",
 
     inputs: [
-      { name: "birthYear", label: "Birth Year", min: 1900 },
+      { name: "birthYear", label: "Birth Year" },
     ],
 
     calculate: ({ birthYear }) => {
@@ -45,19 +67,17 @@ export const calculators = [
     },
   },
 
-  // 💰 Simple Interest
+  // 💰 SIMPLE INTEREST
   {
     id: "si",
     title: "Simple Interest",
     icon: "💸",
     category: "Finance",
-    description: "Calculate simple interest",
-    formulaLabel: "SI = (P × R × T) / 100",
 
     inputs: [
-      { name: "principal", label: "Principal", unit: "₹" },
-      { name: "rate", label: "Rate", unit: "%" },
-      { name: "time", label: "Time", unit: "years" },
+      { name: "principal", label: "Principal (₹)" },
+      { name: "rate", label: "Rate (%)" },
+      { name: "time", label: "Time (years)" },
     ],
 
     calculate: ({ principal, rate, time }) => {
@@ -72,35 +92,30 @@ export const calculators = [
     title: "EMI Calculator",
     icon: "🏦",
     category: "Finance",
-    description: "Monthly loan EMI calculation",
-    formulaLabel: "EMI = [P × R × (1+R)^N] / [(1+R)^N – 1]",
 
     inputs: [
-      { name: "loan", label: "Loan Amount", unit: "₹" },
+      { name: "loan", label: "Loan Amount (₹)" },
       { name: "rate", label: "Interest Rate (%)" },
-      { name: "months", label: "Duration (months)" },
+      { name: "months", label: "Months" },
     ],
 
     calculate: ({ loan, rate, months }) => {
       if (!loan || !rate || !months) return null;
 
       const r = rate / 12 / 100;
-      const emi =
+      return +(
         (loan * r * Math.pow(1 + r, months)) /
-        (Math.pow(1 + r, months) - 1);
-
-      return +emi.toFixed(2);
+        (Math.pow(1 + r, months) - 1)
+      ).toFixed(2);
     },
   },
 
-  // 📊 Percentage
+  // 📊 PERCENTAGE
   {
     id: "percentage",
     title: "Percentage",
     icon: "📊",
     category: "Math",
-    description: "Calculate percentage values",
-    formulaLabel: "(value / total) × 100",
 
     inputs: [
       { name: "value", label: "Value" },
@@ -113,29 +128,27 @@ export const calculators = [
     },
 
     ranges: [
-      { label: "Low", min: 0, max: 40, color: "red" },
-      { label: "Average", min: 40, max: 75, color: "yellow" },
-      { label: "Good", min: 75, max: 100, color: "green" },
+      { label: "Low", min: 0, max: 40 },
+      { label: "Average", min: 40, max: 75 },
+      { label: "Good", min: 75, max: 100 },
     ],
   },
 
-  // 🌡️ Temperature
+  // 🌡️ TEMPERATURE
   {
     id: "temp",
     title: "Temperature",
     icon: "🌡️",
     category: "Conversion",
-    description: "Convert Celsius to Fahrenheit",
-    formulaLabel: "F = (C × 9/5) + 32",
 
     inputs: [
-      { name: "celsius", label: "Celsius", unit: "°C" },
+      { name: "celsius", label: "Celsius (°C)" },
     ],
 
-    calculate: ({ celsius }) => {
-      if (celsius === undefined) return null;
-      return +((celsius * 9) / 5 + 32).toFixed(2);
-    },
+    calculate: ({ celsius }) =>
+      celsius !== undefined
+        ? +((celsius * 9) / 5 + 32).toFixed(2)
+        : null,
   },
 
   // 🧾 GST
@@ -144,61 +157,126 @@ export const calculators = [
     title: "GST Calculator",
     icon: "🧾",
     category: "Finance",
-    description: "Calculate GST and total amount",
-    formulaLabel: "GST = (Amount × Rate) / 100",
 
     inputs: [
-      { name: "amount", label: "Amount", unit: "₹" },
-      { name: "rate", label: "GST Rate (%)" },
+      { name: "amount", label: "Amount (₹)" },
+      { name: "rate", label: "GST (%)" },
     ],
 
     calculate: ({ amount, rate }) => {
       if (!amount || !rate) return null;
 
       const gst = (amount * rate) / 100;
-      const total = amount + gst;
-
       return {
         gst: +gst.toFixed(2),
-        total: +total.toFixed(2),
+        total: +(amount + gst).toFixed(2),
       };
     },
   },
 
-  // 📏 Distance
+  // 📏 DISTANCE (MULTI-UNIT)
   {
     id: "distance",
     title: "Distance Converter",
     icon: "📏",
     category: "Conversion",
-    description: "Convert kilometers to miles",
 
     inputs: [
-      { name: "km", label: "Kilometers", unit: "km" },
+      {
+        name: "value",
+        label: "Distance",
+        units: ["km", "mile"],
+        defaultUnit: "km",
+      },
     ],
 
-    calculate: ({ km }) => {
-      if (!km) return null;
-      return +(km * 0.621371).toFixed(2);
+    calculate: ({ value, unit }) => {
+      if (!value) return null;
+
+      let km = unit === "mile" ? value * 1.60934 : value;
+
+      return {
+        km: +km.toFixed(2),
+        mile: +(km / 1.60934).toFixed(2),
+      };
     },
   },
 
-  // 📐 Area
+  // 📐 AREA
   {
     id: "area",
     title: "Area (Rectangle)",
     icon: "📐",
     category: "Math",
-    description: "Calculate rectangular area",
 
     inputs: [
       { name: "length", label: "Length" },
       { name: "width", label: "Width" },
     ],
 
-    calculate: ({ length, width }) => {
-      if (!length || !width) return null;
-      return +(length * width).toFixed(2);
+    calculate: ({ length, width }) =>
+      length && width ? +(length * width).toFixed(2) : null,
+  },
+
+  // ⚖️ WEIGHT CONVERTER
+  {
+    id: "weight",
+    title: "Weight Converter",
+    icon: "⚖️",
+    category: "Conversion",
+
+    inputs: [
+      {
+        name: "value",
+        label: "Weight",
+        units: ["kg", "lb"],
+        defaultUnit: "kg",
+      },
+    ],
+
+    calculate: ({ value, unit }) => {
+      if (!value) return null;
+
+      let kg = unit === "lb" ? value * 0.453592 : value;
+
+      return {
+        kg: +kg.toFixed(2),
+        lb: +(kg / 0.453592).toFixed(2),
+      };
+    },
+  },
+
+  // ⏱️ TIME CONVERTER
+  {
+    id: "time",
+    title: "Time Converter",
+    icon: "⏱️",
+    category: "Conversion",
+
+    inputs: [
+      {
+        name: "value",
+        label: "Time",
+        units: ["seconds", "minutes", "hours"],
+        defaultUnit: "seconds",
+      },
+    ],
+
+    calculate: ({ value, unit }) => {
+      if (!value) return null;
+
+      let sec =
+        unit === "minutes"
+          ? value * 60
+          : unit === "hours"
+          ? value * 3600
+          : value;
+
+      return {
+        seconds: sec,
+        minutes: +(sec / 60).toFixed(2),
+        hours: +(sec / 3600).toFixed(2),
+      };
     },
   },
 ];
