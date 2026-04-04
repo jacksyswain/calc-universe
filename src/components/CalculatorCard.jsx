@@ -4,20 +4,22 @@ export default function CalculatorCard({
   calc,
   onClick,
   isActive = false,
-  variant = "sidebar", // "sidebar" | "grid"
+  variant = "sidebar",
+  collapsed = false, // 🔥 for future sidebar collapse
 }) {
   const { favorites, toggleFavorite } = useStore();
   const isFav = favorites.includes(calc.id);
 
-  // 🎨 Dynamic styles
-  const baseStyle =
-    "transition-all duration-200 cursor-pointer group";
+  const base =
+    "transition-all duration-200 cursor-pointer group relative";
 
   const sidebarStyle = `
-    flex items-center gap-3 p-3 rounded-xl
-    ${isActive
-      ? "bg-blue-500 text-white shadow"
-      : "hover:bg-gray-100 dark:hover:bg-white/10"}
+    flex items-center gap-3 px-3 py-2 rounded-xl
+    ${
+      isActive
+        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-l-4 border-blue-500"
+        : "hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300"
+    }
   `;
 
   const gridStyle = `
@@ -28,7 +30,7 @@ export default function CalculatorCard({
   return (
     <div
       onClick={onClick}
-      className={`${baseStyle} ${
+      className={`${base} ${
         variant === "sidebar" ? sidebarStyle : gridStyle
       }`}
     >
@@ -38,37 +40,43 @@ export default function CalculatorCard({
           e.stopPropagation();
           toggleFavorite(calc.id);
         }}
-        className={`${
-          variant === "sidebar"
-            ? "text-sm"
-            : "absolute top-2 right-2 text-lg"
-        }`}
+        className={`
+          ${
+            variant === "sidebar"
+              ? "text-xs opacity-0 group-hover:opacity-100"
+              : "absolute top-2 right-2 text-lg"
+          }
+          transition
+        `}
       >
         {isFav ? "⭐" : "☆"}
       </button>
 
-      {/* 🧩 Sidebar Layout */}
+      {/* 🧩 SIDEBAR MODE */}
       {variant === "sidebar" ? (
         <>
           {/* Icon */}
-          <div className="text-xl">{calc.icon || "🧮"}</div>
+          <div className="text-lg">{calc.icon || "🧮"}</div>
 
-          {/* Text */}
-          <div className="flex-1">
-            <p className="text-sm font-semibold">
+          {/* Text (hide when collapsed) */}
+          {!collapsed && (
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-semibold truncate">
+                {calc.title}
+              </p>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {calc.category}
+              </p>
+            </div>
+          )}
+
+          {/* Tooltip (when collapsed) */}
+          {collapsed && (
+            <div className="absolute left-14 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">
               {calc.title}
-            </p>
-
-            <p
-              className={`text-xs ${
-                isActive
-                  ? "text-blue-100"
-                  : "text-gray-500 dark:text-gray-400"
-              }`}
-            >
-              {calc.category}
-            </p>
-          </div>
+            </div>
+          )}
         </>
       ) : (
         <>

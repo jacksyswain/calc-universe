@@ -6,7 +6,6 @@ export const calculators = [
     icon: "⚖️",
     category: "Health",
     description: "Calculate your Body Mass Index",
-    formulaLabel: "BMI = weight / height²",
 
     inputs: [
       {
@@ -23,7 +22,6 @@ export const calculators = [
       },
     ],
 
-    // 🔥 Normalize to meters & kg
     normalize: ({ height, heightUnit, weight, weightUnit }) => {
       let h = height;
       let w = weight;
@@ -49,21 +47,52 @@ export const calculators = [
     ],
   },
 
-  // 🎂 AGE
+  // 🎂 AGE (ACCURATE VERSION 🔥)
   {
     id: "age",
     title: "Age Calculator",
     icon: "🎂",
     category: "General",
-    description: "Calculate your current age",
+    description: "Calculate exact age (years, months, days)",
 
     inputs: [
-      { name: "birthYear", label: "Birth Year" },
+      { name: "day", label: "Day" },
+      { name: "month", label: "Month" },
+      { name: "year", label: "Year" },
     ],
 
-    calculate: ({ birthYear }) => {
-      if (!birthYear) return null;
-      return new Date().getFullYear() - birthYear;
+    calculate: ({ day, month, year }) => {
+      if (!day || !month || !year) return null;
+
+      const today = new Date();
+      const birth = new Date(year, month - 1, day);
+
+      if (birth > today) return "Invalid Date";
+
+      let years = today.getFullYear() - birth.getFullYear();
+      let months = today.getMonth() - birth.getMonth();
+      let days = today.getDate() - birth.getDate();
+
+      if (days < 0) {
+        months--;
+        const prevMonthDays = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          0
+        ).getDate();
+        days += prevMonthDays;
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      return {
+        years,
+        months,
+        days,
+      };
     },
   },
 
@@ -80,10 +109,10 @@ export const calculators = [
       { name: "time", label: "Time (years)" },
     ],
 
-    calculate: ({ principal, rate, time }) => {
-      if (!principal || !rate || !time) return null;
-      return +((principal * rate * time) / 100).toFixed(2);
-    },
+    calculate: ({ principal, rate, time }) =>
+      principal && rate && time
+        ? +((principal * rate * time) / 100).toFixed(2)
+        : null,
   },
 
   // 🏦 EMI
@@ -94,8 +123,8 @@ export const calculators = [
     category: "Finance",
 
     inputs: [
-      { name: "loan", label: "Loan Amount (₹)" },
-      { name: "rate", label: "Interest Rate (%)" },
+      { name: "loan", label: "Loan (₹)" },
+      { name: "rate", label: "Rate (%)" },
       { name: "months", label: "Months" },
     ],
 
@@ -122,10 +151,8 @@ export const calculators = [
       { name: "total", label: "Total" },
     ],
 
-    calculate: ({ value, total }) => {
-      if (!value || !total) return null;
-      return +((value / total) * 100).toFixed(2);
-    },
+    calculate: ({ value, total }) =>
+      value && total ? +((value / total) * 100).toFixed(2) : null,
 
     ranges: [
       { label: "Low", min: 0, max: 40 },
@@ -141,9 +168,7 @@ export const calculators = [
     icon: "🌡️",
     category: "Conversion",
 
-    inputs: [
-      { name: "celsius", label: "Celsius (°C)" },
-    ],
+    inputs: [{ name: "celsius", label: "Celsius (°C)" }],
 
     calculate: ({ celsius }) =>
       celsius !== undefined
@@ -167,6 +192,7 @@ export const calculators = [
       if (!amount || !rate) return null;
 
       const gst = (amount * rate) / 100;
+
       return {
         gst: +gst.toFixed(2),
         total: +(amount + gst).toFixed(2),
@@ -174,7 +200,7 @@ export const calculators = [
     },
   },
 
-  // 📏 DISTANCE (MULTI-UNIT)
+  // 📏 DISTANCE
   {
     id: "distance",
     title: "Distance Converter",
@@ -202,23 +228,7 @@ export const calculators = [
     },
   },
 
-  // 📐 AREA
-  {
-    id: "area",
-    title: "Area (Rectangle)",
-    icon: "📐",
-    category: "Math",
-
-    inputs: [
-      { name: "length", label: "Length" },
-      { name: "width", label: "Width" },
-    ],
-
-    calculate: ({ length, width }) =>
-      length && width ? +(length * width).toFixed(2) : null,
-  },
-
-  // ⚖️ WEIGHT CONVERTER
+  // ⚖️ WEIGHT
   {
     id: "weight",
     title: "Weight Converter",
@@ -246,7 +256,7 @@ export const calculators = [
     },
   },
 
-  // ⏱️ TIME CONVERTER
+  // ⏱️ TIME
   {
     id: "time",
     title: "Time Converter",
