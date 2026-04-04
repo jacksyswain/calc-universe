@@ -8,14 +8,13 @@ export default function AccordionCalculator({ calc }) {
     setCalculatorState,
   } = useStore();
 
-  // 🧠 Load saved state for this calculator
   const savedState = calculatorStates[calc.id] || {};
 
   const [inputs, setInputs] = useState(savedState.inputs || {});
   const [result, setResult] = useState(savedState.result || null);
   const [error, setError] = useState("");
 
-  // 🔄 Update state when switching calculator
+  // 🔄 Restore when switching calculator
   useEffect(() => {
     const saved = calculatorStates[calc.id] || {};
     setInputs(saved.inputs || {});
@@ -23,7 +22,7 @@ export default function AccordionCalculator({ calc }) {
     setError("");
   }, [calc.id]);
 
-  // 🧠 handle input
+  // 🧠 Handle value + unit
   const handleChange = (name, value) => {
     const updated = {
       ...inputs,
@@ -31,15 +30,20 @@ export default function AccordionCalculator({ calc }) {
     };
 
     setInputs(updated);
-
-    // 🔥 Save live input state
-    setCalculatorState(calc.id, {
-      inputs: updated,
-      result,
-    });
+    setCalculatorState(calc.id, { inputs: updated, result });
   };
 
-  // 🧠 calculate
+  const handleUnitChange = (name, unit) => {
+    const updated = {
+      ...inputs,
+      [`${name}Unit`]: unit,
+    };
+
+    setInputs(updated);
+    setCalculatorState(calc.id, { inputs: updated, result });
+  };
+
+  // 🧠 Calculate
   const handleCalculate = () => {
     setError("");
 
@@ -51,16 +55,29 @@ export default function AccordionCalculator({ calc }) {
     }
 
     try {
-      const res = calc.calculate(inputs);
+      // 🔥 Normalize if exists
+      let finalInputs = inputs;
+      if (calc.normalize) {
+        finalInputs = calc.normalize(inputs);
+      }
+
+      // 🔥 Special case (unit-based converters)
+      if (!calc.normalize) {
+        calc.inputs.forEach((input) => {
+          if (input.units) {
+            finalInputs.unit = inputs[`${input.name}Unit`] || input.defaultUnit;
+          }
+        });
+      }
+
+      const res = calc.calculate(finalInputs);
       setResult(res);
 
-      // 💾 Save state
       setCalculatorState(calc.id, {
         inputs,
         result: res,
       });
 
-      // 🕒 History
       addHistory({
         type: calc.title,
         result: res,
@@ -71,7 +88,7 @@ export default function AccordionCalculator({ calc }) {
     }
   };
 
-  // 🔄 Reset ONLY this calculator
+  // 🔄 Reset
   const handleReset = () => {
     setInputs({});
     setResult(null);
@@ -83,7 +100,7 @@ export default function AccordionCalculator({ calc }) {
     });
   };
 
-  // 📊 detect category
+  // 📊 Category detection
   const getCategory = () => {
     if (!calc.ranges || typeof result !== "number") return null;
 
@@ -93,8 +110,6 @@ export default function AccordionCalculator({ calc }) {
   };
 
   const category = getCategory();
-
-  // 📊 progress %
   const progress =
     typeof result === "number" ? Math.min(result, 100) : 0;
 
@@ -113,54 +128,74 @@ export default function AccordionCalculator({ calc }) {
               {calc.description}
             </p>
           )}
-
-          {calc.formulaLabel && (
-            <p className="text-xs text-gray-400 mt-1">
-              {calc.formulaLabel}
-            </p>
-          )}
         </div>
 
-        {/* 🔢 Inputs */}
+        {/* 🔢 Inputs with Units */}
         <div className="grid md:grid-cols-2 gap-4">
           {calc.inputs.map((input) => (
             <div key={input.name}>
               <label className="text-sm text-gray-600 dark:text-gray-300">
-                {input.label} {input.unit && `(${input.unit})`}
+                {input.label}
               </label>
 
-              <input
-                type="number"
-                value={inputs[input.name] || ""}
-                placeholder={`Enter ${input.label}`}
-                className="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-white/20 bg-white dark:bg-white/5 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                onChange={(e) =>
-                  handleChange(input.name, e.target.value)
-                }
-              />
+              <div className="flex gap-2 mt-1">
+                {/* Input */}
+                <input
+                  type="number"
+                  value={inputs[input.name] || ""}
+                  placeholder={`Enter ${input.label}`}
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-white/20 bg-white dark:bg-white/5 focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) =>
+                    handleChange(input.name, e.target.value)
+                  }
+                />
+
+                {/* 🔥 Unit Dropdown */}
+                {input.units && (
+                  <select
+                    value={
+                      inputs[`${input.name}Unit`] ||
+                      input.defaultUnit
+                    }
+                    onChange={(e) =>
+                      handleUnitChange(
+                        input.name,
+                        e.target.value
+                      )
+                    }
+                    className="px-2 py-2 rounded-xl border bg-gray-50 dark:bg-white/10"
+                  >
+                    {input.units.map((unit) => (
+                      <option key={unit} value={unit}>
+                        {unit}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
             </div>
           ))}
         </div>
 
         {/* ❌ Error */}
         {error && (
-          <div className="mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm text-center">
+          <div className="mt-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm text-center">
             {error}
           </div>
         )}
 
-        {/* 🔘 Actions */}
+        {/* 🔘 Buttons */}
         <div className="flex gap-3 mt-6">
           <button
             onClick={handleCalculate}
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold shadow hover:scale-[1.02] transition"
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold"
           >
             Calculate
           </button>
 
           <button
             onClick={handleReset}
-            className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition"
+            className="flex-1 py-3 rounded-xl bg-gray-200 dark:bg-white/10"
           >
             Reset
           </button>
@@ -170,45 +205,32 @@ export default function AccordionCalculator({ calc }) {
         {result !== null && (
           <div className="mt-6 space-y-4">
 
-            {/* 🟢 Result Card */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border border-green-200 dark:border-green-700 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Result
-              </p>
+            <div className="p-5 rounded-2xl bg-green-50 dark:bg-green-900/30 text-center">
+              <p className="text-sm">Result</p>
 
               {typeof result === "object" ? (
-                <div className="mt-2 text-lg font-semibold text-green-600 dark:text-green-400">
-                  {Object.entries(result).map(([key, val]) => (
-                    <p key={key}>
-                      {key}: {val}
-                    </p>
-                  ))}
-                </div>
+                Object.entries(result).map(([k, v]) => (
+                  <p key={k}>
+                    {k}: {v}
+                  </p>
+                ))
               ) : (
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">
-                  {result}
-                </p>
+                <p className="text-3xl font-bold">{result}</p>
               )}
             </div>
 
             {/* 📊 Stats */}
             {category && (
-              <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Status
-                </p>
-
-                <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {category.label}
-                </p>
+              <div className="p-3 bg-blue-50 text-center rounded-xl">
+                {category.label}
               </div>
             )}
 
             {/* 📈 Progress */}
             {typeof result === "number" && (
-              <div className="w-full bg-gray-200 dark:bg-white/10 h-2 rounded-full">
+              <div className="h-2 bg-gray-200 rounded-full">
                 <div
-                  className="h-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all"
+                  className="h-2 bg-blue-500 rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>
