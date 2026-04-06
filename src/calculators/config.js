@@ -200,7 +200,7 @@ export const calculators = [
     },
   },
 
-  // 📏 DISTANCE
+  // DISTANCE
   {
     id: "distance",
     title: "Distance Converter",
