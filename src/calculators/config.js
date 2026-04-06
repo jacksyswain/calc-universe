@@ -256,7 +256,7 @@ export const calculators = [
     },
   },
 
-  // ⏱️ TIME
+  //  TIME
   {
     id: "time",
     title: "Time Converter",
