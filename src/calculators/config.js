@@ -255,7 +255,164 @@ export const calculators = [
       };
     },
   },
+  // 📐 AREA (MORE TYPES)
+  {
+    id: "area-advanced",
+    title: "Area Converter",
+    icon: "📐",
+    category: "Math",
 
+    inputs: [
+      {
+        name: "value",
+        label: "Area",
+        units: ["sqm", "sqft"],
+        defaultUnit: "sqm",
+      },
+    ],
+
+    calculate: ({ value, unit }) => {
+      if (!value) return null;
+
+      let sqm = unit === "sqft" ? value * 0.092903 : value;
+
+      return {
+        sqm: +sqm.toFixed(2),
+        sqft: +(sqm * 10.7639).toFixed(2),
+      };
+    },
+  },
+
+  // 🚗 SPEED CONVERTER
+  {
+    id: "speed",
+    title: "Speed Converter",
+    icon: "🚗",
+    category: "Conversion",
+
+    inputs: [
+      {
+        name: "value",
+        label: "Speed",
+        units: ["kmh", "mph"],
+        defaultUnit: "kmh",
+      },
+    ],
+
+    calculate: ({ value, unit }) => {
+      if (!value) return null;
+
+      let kmh = unit === "mph" ? value * 1.60934 : value;
+
+      return {
+        kmh: +kmh.toFixed(2),
+        mph: +(kmh * 0.621371).toFixed(2),
+      };
+    },
+  },
+
+  // 🧮 POWER CALCULATOR
+  {
+    id: "power",
+    title: "Power Calculator",
+    icon: "⚡",
+    category: "Math",
+
+    inputs: [
+      { name: "base", label: "Base" },
+      { name: "exponent", label: "Exponent" },
+    ],
+
+    calculate: ({ base, exponent }) =>
+      base && exponent ? Math.pow(base, exponent) : null,
+  },
+
+  // 📦 VOLUME (CUBE)
+  {
+    id: "volume",
+    title: "Volume (Cube)",
+    icon: "📦",
+    category: "Math",
+
+    inputs: [
+      { name: "side", label: "Side" },
+    ],
+
+    calculate: ({ side }) =>
+      side ? +(side * side * side).toFixed(2) : null,
+  },
+
+  // 🧠 BMI IDEAL WEIGHT
+  {
+    id: "ideal-weight",
+    title: "Ideal Weight",
+    icon: "🧠",
+    category: "Health",
+
+    inputs: [
+      {
+        name: "height",
+        label: "Height",
+        units: ["cm"],
+        defaultUnit: "cm",
+      },
+    ],
+
+    calculate: ({ height }) => {
+      if (!height) return null;
+
+      // Devine formula approx
+      const ideal = 50 + 0.9 * (height - 152);
+
+      return {
+        idealWeight: +ideal.toFixed(2),
+      };
+    },
+  },
+
+  // 💸 DISCOUNT CALCULATOR
+  {
+    id: "discount",
+    title: "Discount Calculator",
+    icon: "💸",
+    category: "Finance",
+
+    inputs: [
+      { name: "price", label: "Original Price" },
+      { name: "discount", label: "Discount (%)" },
+    ],
+
+    calculate: ({ price, discount }) => {
+      if (!price || !discount) return null;
+
+      const saved = (price * discount) / 100;
+      const final = price - saved;
+
+      return {
+        saved: +saved.toFixed(2),
+        finalPrice: +final.toFixed(2),
+      };
+    },
+  },
+
+  // 🔢 RANDOM NUMBER
+  {
+    id: "random",
+    title: "Random Number Generator",
+    icon: "🎲",
+    category: "General",
+
+    inputs: [
+      { name: "min", label: "Min" },
+      { name: "max", label: "Max" },
+    ],
+
+    calculate: ({ min, max }) => {
+      if (min === undefined || max === undefined) return null;
+
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+  },
   //  TIME
   {
     id: "time",
@@ -279,8 +436,8 @@ export const calculators = [
         unit === "minutes"
           ? value * 60
           : unit === "hours"
-          ? value * 3600
-          : value;
+            ? value * 3600
+            : value;
 
       return {
         seconds: sec,
