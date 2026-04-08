@@ -413,6 +413,189 @@ export const calculators = [
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
   },
+  // 🧮 FACTORIAL
+  {
+    id: "factorial",
+    title: "Factorial Calculator",
+    icon: "🧮",
+    category: "Math",
+
+    inputs: [
+      { name: "number", label: "Number" },
+    ],
+
+    calculate: ({ number }) => {
+      if (number === undefined || number < 0) return null;
+
+      let result = 1;
+      for (let i = 1; i <= number; i++) {
+        result *= i;
+      }
+
+      return result;
+    },
+  },
+
+  // 🔢 PRIME CHECK
+  {
+    id: "prime",
+    title: "Prime Checker",
+    icon: "🔢",
+    category: "Math",
+
+    inputs: [
+      { name: "number", label: "Number" },
+    ],
+
+    calculate: ({ number }) => {
+      if (!number || number < 2) return "Not Prime";
+
+      for (let i = 2; i <= Math.sqrt(number); i++) {
+        if (number % i === 0) return "Not Prime";
+      }
+
+      return "Prime";
+    },
+  },
+
+  // 📅 DAYS BETWEEN DATES
+  {
+    id: "days-between",
+    title: "Days Between Dates",
+    icon: "📅",
+    category: "General",
+
+    inputs: [
+      { name: "start", label: "Start Date (YYYY-MM-DD)" },
+      { name: "end", label: "End Date (YYYY-MM-DD)" },
+    ],
+
+    calculate: ({ start, end }) => {
+      if (!start || !end) return null;
+
+      const d1 = new Date(start);
+      const d2 = new Date(end);
+
+      const diff =
+        Math.abs(d2 - d1) / (1000 * 60 * 60 * 24);
+
+      return Math.floor(diff);
+    },
+  },
+
+  // 💳 LOAN INTEREST TOTAL
+  {
+    id: "loan-total",
+    title: "Loan Total Interest",
+    icon: "💳",
+    category: "Finance",
+
+    inputs: [
+      { name: "principal", label: "Principal" },
+      { name: "rate", label: "Rate (%)" },
+      { name: "years", label: "Years" },
+    ],
+
+    calculate: ({ principal, rate, years }) => {
+      if (!principal || !rate || !years) return null;
+
+      const interest = (principal * rate * years) / 100;
+
+      return {
+        interest: +interest.toFixed(2),
+        total: +(principal + interest).toFixed(2),
+      };
+    },
+  },
+
+  // 📈 PROFIT / LOSS
+  {
+    id: "profit-loss",
+    title: "Profit & Loss",
+    icon: "📈",
+    category: "Finance",
+
+    inputs: [
+      { name: "cost", label: "Cost Price" },
+      { name: "selling", label: "Selling Price" },
+    ],
+
+    calculate: ({ cost, selling }) => {
+      if (!cost || !selling) return null;
+
+      const diff = selling - cost;
+      const percent = (diff / cost) * 100;
+
+      return {
+        type: diff > 0 ? "Profit" : "Loss",
+        amount: Math.abs(diff).toFixed(2),
+        percent: Math.abs(percent).toFixed(2),
+      };
+    },
+  },
+
+  // 🧪 BMI CATEGORY EXPLAINER
+  {
+    id: "bmi-info",
+    title: "BMI Info",
+    icon: "🧪",
+    category: "Health",
+
+    inputs: [
+      { name: "bmi", label: "Enter BMI" },
+    ],
+
+    calculate: ({ bmi }) => {
+      if (!bmi) return null;
+
+      if (bmi < 18.5) return "Underweight";
+      if (bmi < 25) return "Normal";
+      if (bmi < 30) return "Overweight";
+      return "Obese";
+    },
+  },
+
+  // 🔋 ELECTRICITY BILL
+  {
+    id: "electricity",
+    title: "Electricity Bill",
+    icon: "🔋",
+    category: "General",
+
+    inputs: [
+      { name: "units", label: "Units Consumed" },
+      { name: "rate", label: "Rate per Unit" },
+    ],
+
+    calculate: ({ units, rate }) => {
+      if (!units || !rate) return null;
+
+      const total = units * rate;
+
+      return {
+        bill: total.toFixed(2),
+      };
+    },
+  },
+
+  // 🧊 CYLINDER VOLUME
+  {
+    id: "cylinder",
+    title: "Cylinder Volume",
+    icon: "🧊",
+    category: "Math",
+
+    inputs: [
+      { name: "radius", label: "Radius" },
+      { name: "height", label: "Height" },
+    ],
+
+    calculate: ({ radius, height }) => {
+      if (!radius || !height) return null;
+
+      return +(Math.PI * radius * radius * height).toFixed(2);
+    },
+  },
   //  TIME
   {
     id: "time",
