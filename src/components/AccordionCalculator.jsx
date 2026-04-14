@@ -226,7 +226,7 @@ export default function AccordionCalculator({ calc }) {
               </div>
             )}
 
-            {/* 📈 Progress */}
+            
             {typeof result === "number" && (
               <div className="h-2 bg-gray-200 rounded-full">
                 <div
