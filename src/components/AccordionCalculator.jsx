@@ -184,7 +184,7 @@ export default function AccordionCalculator({ calc }) {
           </div>
         )}
 
-        {/* 🔘 Buttons */}
+        
         <div className="flex gap-3 mt-6">
           <button
             onClick={handleCalculate}
