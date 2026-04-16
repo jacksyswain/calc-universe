@@ -201,7 +201,7 @@ export default function AccordionCalculator({ calc }) {
           </button>
         </div>
 
-        {/* 📊 Result */}
+        {/* 📊 Result           */}
         {result !== null && (
           <div className="mt-6 space-y-4">
 
