@@ -177,7 +177,7 @@ export default function AccordionCalculator({ calc }) {
           ))}
         </div>
 
-        {/* ❌ Error */}
+        {/* ❌ Error  handling */              }
         {error && (
           <div className="mt-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm text-center">
             {error}
