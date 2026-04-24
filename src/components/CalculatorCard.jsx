@@ -11,25 +11,28 @@ export default function CalculatorCard({
   const isFav = favorites.includes(calc.id);
 
   const base =
-    "relative flex items-center transition-all duration-200 cursor-pointer group select-none";
+    "relative flex items-center transition-all duration-200 cursor-pointer group select-none focus:outline-none";
 
   const sidebarStyle = `
     gap-3 px-3 py-2 rounded-xl
     ${
       isActive
-        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800"
+        ? "bg-gradient-to-r from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800"
         : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10"
     }
   `;
 
   const gridStyle = `
     relative p-4 rounded-2xl bg-gradient-to-br from-white to-gray-100
-    shadow-md hover:shadow-xl hover:scale-[1.03]
+    shadow-md hover:shadow-xl hover:scale-[1.04]
   `;
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => e.key === "Enter" && onClick()}
       className={`${base} ${
         variant === "sidebar" ? sidebarStyle : gridStyle
       }`}
@@ -46,7 +49,7 @@ export default function CalculatorCard({
               ? "absolute right-2 text-xs opacity-0 group-hover:opacity-100"
               : "absolute top-2 right-2 text-lg"
           }
-          transition-all duration-200 hover:scale-110
+          transition-all duration-200 hover:scale-125 active:scale-95
         `}
       >
         {isFav ? "⭐" : "☆"}
@@ -55,13 +58,13 @@ export default function CalculatorCard({
       {/* 🧩 SIDEBAR MODE */}
       {variant === "sidebar" ? (
         <>
-          {/* Icon Container */}
+          {/* Icon */}
           <div
-            className={`flex items-center justify-center w-8 h-8 rounded-lg 
+            className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all
             ${
               isActive
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 dark:bg-white/10"
+                ? "bg-blue-500 text-white shadow-md scale-105"
+                : "bg-gray-100 dark:bg-white/10 group-hover:scale-105"
             }`}
           >
             {calc.icon || "🧮"}
@@ -80,14 +83,14 @@ export default function CalculatorCard({
             </div>
           )}
 
-          {/* 👉 Active Indicator */}
+          {/* 👉 Active indicator */}
           {isActive && (
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full" />
+            <div className="absolute left-0 top-1 bottom-1 w-1 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-r-full" />
           )}
 
-          {/* Tooltip (collapsed mode) */}
+          {/* Tooltip */}
           {collapsed && (
-            <div className="absolute left-14 bg-gray-900 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap shadow-lg z-50">
+            <div className="absolute left-16 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap shadow-xl z-50">
               {calc.title}
             </div>
           )}
@@ -112,11 +115,14 @@ export default function CalculatorCard({
           )}
 
           {/* 🔥 CTA */}
-          <div className="mt-4 text-center text-blue-500 text-sm font-medium group-hover:translate-x-1 transition">
+          <div className="mt-4 text-center text-blue-500 text-sm font-medium flex justify-center items-center gap-1 group-hover:gap-2 transition-all">
             Open →
           </div>
         </>
       )}
+
+      {/* 🟢 Click Ripple Effect */}
+      <span className="absolute inset-0 rounded-xl opacity-0 group-active:opacity-10 bg-blue-500 transition" />
     </div>
   );
 }
